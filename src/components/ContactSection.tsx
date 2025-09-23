@@ -52,7 +52,7 @@ const offices = [
     phone: "+(237) 699 816 6331",
     hours: "Mon-Fri: 8AM-6PM"
   },
-  {
+  { 
     city: "",
     address: "789 Waste St, Chicago, IL 60601",
     phone: "+1 (555) 456-7890", 
