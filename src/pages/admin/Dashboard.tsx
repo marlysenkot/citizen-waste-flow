@@ -202,38 +202,36 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Recent Complaints */}
-        <Card>
-          <CardHeader className="flex justify-between items-center">
-            <CardTitle>Recent Complaints</CardTitle>
-            <Link to="/admin/complaints">
-              <Button variant="ghost" size="sm">View All</Button>
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recentComplaints.map((complaint: any) => (
-              <div key={complaint.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">{complaint.subject}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {complaint.id} • {complaint.customer}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={getPriorityColor(complaint.priority)}>
-                    {complaint.priority}
-                  </Badge>
-                  <Badge variant={
-                    complaint.status === "Resolved" ? "default" : 
-                    complaint.status === "Under Review" ? "secondary" : 
-                    "destructive"
-                  }>
-                    {complaint.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <CardContent className="space-y-4">
+  {recentComplaints.map((complaint: any) => (
+    <div key={complaint.id} className="flex items-center justify-between p-3 border rounded-lg">
+      <div>
+        {/* Display subject + short description */}
+        <p className="font-medium">{complaint.subject || "No Subject"}</p>
+        <p className="text-sm text-muted-foreground">
+          {complaint.customer || "Unknown Customer"} • {new Date(complaint.created_at).toLocaleDateString()}
+        </p>
+        {complaint.description && (
+          <p className="text-sm text-muted-foreground truncate max-w-sm">
+            {complaint.description}
+          </p>
+        )}
+      </div>
+      <div className="flex flex-col items-end gap-1">
+        <Badge variant="outline" className={getPriorityColor(complaint.priority)}>
+          {complaint.priority || "No Priority"}
+        </Badge>
+        <Badge variant={
+          complaint.status === "Resolved" ? "default" :
+          complaint.status === "Under Review" ? "secondary" :
+          "destructive"
+        }>
+          {complaint.status || "Unknown Status"}
+        </Badge>
+      </div>
+    </div>
+  ))}
+</CardContent>
       </div>
 
       {/* Top Collectors */}

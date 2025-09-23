@@ -36,6 +36,7 @@ import AdminLocations from "./pages/admin/Locations";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { CollectorLayout } from "@/components/collector/CollectorLayout";
 import { CitizenLayout } from "@/components/citizen/CitizenLayout";
+import { Products } from "./pages/citizen/Products";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="complaints" element={<Complaints />} />
             <Route path="complaints/new" element={<NewComplaint />} />
             <Route path="profile" element={<Profile />} />
+             <Route path="products" element={<Products />} /> {/* ← Products */}
           </Route>
           
           {/* Collector Routes */}

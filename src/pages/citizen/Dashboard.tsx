@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Plus
 } from "lucide-react";
+import { Header } from "@/components/Header";
 
 export default function CitizenDashboard() {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
@@ -18,7 +19,7 @@ export default function CitizenDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const apiUrl = import.meta.env.VITE_API_URL; // Backend URL
+  const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -62,116 +63,136 @@ export default function CitizenDashboard() {
     fetchData();
   }, [token, apiUrl]);
 
+  const getStatusBadge = (status: string) => {
+    let variant: "default" | "secondary" | "outline" | "destructive" = "outline";
+    let Icon = null;
+
+    switch (status) {
+      case "Completed":
+        variant = "default";
+        Icon = CheckCircle;
+        break;
+      case "Scheduled":
+        variant = "secondary";
+        Icon = Clock;
+        break;
+      case "In Progress":
+        variant = "outline";
+        Icon = AlertCircle;
+        break;
+      case "Cancelled":
+        variant = "destructive";
+        Icon = AlertCircle;
+        break;
+      default:
+        variant = "outline";
+    }
+
+    return (
+      <Badge variant={variant} className="flex items-center gap-1">
+        {Icon && <Icon className="h-3 w-3" />}
+        {status}
+      </Badge>
+    );
+  };
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back!</h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your waste management services
-        </p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <Header />
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back!</h1>
+          <p className="text-muted-foreground">
+            Here's an overview of your waste management services
+          </p>
+        </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent Orders */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Recent Orders</CardTitle>
-            <Link to="/citizen/orders">
-              <Button variant="ghost" size="sm">View All</Button>
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recentOrders.length === 0 && !loading && <p>No orders found</p>}
-            {recentOrders.map((order: any) => (
-              <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">{order.service}</p>
-                  <p className="text-sm text-muted-foreground">{order.id} • {order.date}</p>
+        {loading && <p>Loading...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Recent Orders */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Recent Orders</CardTitle>
+              <Link to="/citizen/orders">
+                <Button variant="ghost" size="sm">View All</Button>
+              </Link>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {recentOrders.length === 0 && !loading && <p>No orders found</p>}
+              {recentOrders.map((order: any) => (
+                <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{order.product?.name || "Waste Collection"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Quantity: {order.quantity} • Total: {order.total_price?.toFixed(2)} FCFA
+                    </p>
+                    <p className="text-sm text-muted-foreground">{order.date}</p>
+                  </div>
+                  {getStatusBadge(order.status || "Scheduled")}
                 </div>
-                <Badge variant={
-                  order.status === "Completed" ? "default" : 
-                  order.status === "Scheduled" ? "secondary" : 
-                  "outline"
-                }>
-                  {order.status === "Completed" && <CheckCircle className="h-3 w-3 mr-1" />}
-                  {order.status === "Scheduled" && <Clock className="h-3 w-3 mr-1" />}
-                  {order.status === "In Progress" && <AlertCircle className="h-3 w-3 mr-1" />}
-                  {order.status}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
 
-        {/* Active Complaints */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Complaints & Feedback</CardTitle>
-            <Link to="/citizen/complaints">
-              <Button variant="ghost" size="sm">View All</Button>
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {activeComplaints.length === 0 && !loading && <p>No complaints found</p>}
-            {activeComplaints.map((complaint: any) => (
-              <div key={complaint.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">{complaint.subject}</p>
-                  <p className="text-sm text-muted-foreground">{complaint.id} • {complaint.date}</p>
+          {/* Active Complaints */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Complaints & Feedback</CardTitle>
+              <Link to="/citizen/complaints">
+                <Button variant="ghost" size="sm">View All</Button>
+              </Link>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {activeComplaints.length === 0 && !loading && <p>No complaints found</p>}
+              {activeComplaints.map((complaint: any) => (
+                <div key={complaint.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{complaint.subject || "No Subject"}</p>
+                    <p className="text-sm text-muted-foreground">{complaint.date}</p>
+                  </div>
+                  {getStatusBadge(complaint.status || "Pending")}
                 </div>
-                <Badge variant={complaint.status === "Resolved" ? "default" : "secondary"}>
-                  {complaint.status}
-                </Badge>
-              </div>
-            ))}
-            <Link to="/citizen/complaints/new">
-              <Button className="w-full" variant="outline">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Submit New Complaint
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+              ))}
+              <Link to="/citizen/complaints/new">
+                <Button className="w-full" variant="outline">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Submit New Complaint
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
 
-        {/* Collections */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Waste Collections</CardTitle>
-            <Link to="/citizen/collections">
-              <Button variant="ghost" size="sm">View All</Button>
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {collections.length === 0 && !loading && <p>No collections found</p>}
-            {collections.map((collection: any) => (
-              <div key={collection.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div>
-                  <p className="font-medium">{collection.location}</p>
-                  <p className="text-sm text-muted-foreground">{collection.id} • {collection.date}</p>
+          {/* Collections */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Waste Collections</CardTitle>
+              <Link to="/citizen/collections">
+                <Button variant="ghost" size="sm">View All</Button>
+              </Link>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {collections.length === 0 && !loading && <p>No collections found</p>}
+              {collections.map((collection: any) => (
+                <div key={collection.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{collection.location || "Unknown Location"}</p>
+                    <p className="text-sm text-muted-foreground">{collection.date}</p>
+                  </div>
+                  {getStatusBadge(collection.status || "Scheduled")}
                 </div>
-                <Badge variant={
-                  collection.status === "Completed" ? "default" :
-                  collection.status === "Scheduled" ? "secondary" :
-                  "outline"
-                }>
-                  {collection.status === "Completed" && <CheckCircle className="h-3 w-3 mr-1" />}
-                  {collection.status === "Scheduled" && <Clock className="h-3 w-3 mr-1" />}
-                  {collection.status === "In Progress" && <AlertCircle className="h-3 w-3 mr-1" />}
-                  {collection.status}
-                </Badge>
-              </div>
-            ))}
-            <Link to="/citizen/collections/">
-              <Button className="w-full" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Request New Collection
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+              ))}
+              <Link to="/citizen/collections/new">
+                <Button className="w-full" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Request New Collection
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

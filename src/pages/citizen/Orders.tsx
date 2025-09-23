@@ -60,7 +60,7 @@ export default function Orders() {
           date: order.date || new Date().toISOString().split("T")[0],
           time: order.time || "Morning (8:00 AM - 12:00 PM)",
           address: order.address || "Not provided",
-          price: `$${order.total_price?.toFixed(2) || "0.00"}`,
+          price: `${order.total_price?.toFixed(2) || "0.00"} FCFA`,
           collector: order.collector || "Not assigned yet"
         })));
       } catch (err: any) {
@@ -124,7 +124,7 @@ export default function Orders() {
               <Search className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
               <Input placeholder="Search orders..." className="pl-10" />
             </div>
-            <Link to="/citizen/schedule">
+            <Link to="/citizen/products">
               <Button>
                 <Package className="h-4 w-4 mr-2" />
                 New Order

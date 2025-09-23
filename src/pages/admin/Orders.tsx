@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,11 +40,11 @@ export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Fetch orders from backend
+  // Fetch orders
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token"); // adjust if needed
+      const token = localStorage.getItem("token");
       const res = await fetch("http://127.0.0.1:8000/admin/orders", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -63,45 +63,37 @@ export default function AdminOrders() {
     fetchOrders();
   }, []);
 
-  // Filtered orders
+  // Filter orders
   const filteredOrders = orders.filter(order => {
+    const search = searchTerm.toLowerCase();
     const matchesSearch =
-      (order.customer?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-      (order.service?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-      (order.address?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+      (order.customer?.toLowerCase().includes(search) ?? false) ||
+      (order.service?.toLowerCase().includes(search) ?? false) ||
+      (order.address?.toLowerCase().includes(search) ?? false);
 
     const matchesStatus =
-      statusFilter === "all" || order.status?.toLowerCase() === statusFilter.toLowerCase();
+      statusFilter.toLowerCase() === "all" || (order.status?.toLowerCase() === statusFilter.toLowerCase());
 
     return matchesSearch && matchesStatus;
   });
 
-  // Helpers for UI
+  // Badge helpers
   const getStatusColor = (status?: string) => {
-    switch (status) {
-      case "Completed":
-        return "default";
-      case "In Progress":
-        return "secondary";
-      case "Scheduled":
-        return "outline";
-      case "Cancelled":
-        return "destructive";
-      default:
-        return "outline";
+    switch ((status || "").toLowerCase()) {
+      case "completed": return "default";
+      case "in progress": return "secondary";
+      case "scheduled": return "outline";
+      case "cancelled": return "destructive";
+      default: return "outline";
     }
   };
 
   const getStatusIcon = (status?: string) => {
-    switch (status) {
-      case "Completed":
-        return <CheckCircle className="h-4 w-4" />;
-      case "In Progress":
-        return <Clock className="h-4 w-4" />;
-      case "Scheduled":
-        return <Calendar className="h-4 w-4" />;
-      default:
-        return <Package className="h-4 w-4" />;
+    switch ((status || "").toLowerCase()) {
+      case "completed": return <CheckCircle className="h-4 w-4" />;
+      case "in progress": return <Clock className="h-4 w-4" />;
+      case "scheduled": return <Calendar className="h-4 w-4" />;
+      default: return <Package className="h-4 w-4" />;
     }
   };
 
@@ -119,7 +111,7 @@ export default function AdminOrders() {
           <p className="text-muted-foreground">Monitor and manage all collection orders.</p>
         </div>
 
-        {/* Search and Filters */}
+        {/* Search & Filter */}
         <Card className="mb-6">
           <CardContent className="p-4 flex gap-4 flex-wrap">
             <div className="relative flex-1 max-w-md">
@@ -149,6 +141,7 @@ export default function AdminOrders() {
 
         {/* Orders List */}
         <div className="space-y-4">
+          {filteredOrders.length === 0 && <div>No orders found.</div>}
           {filteredOrders.map((order) => (
             <Card key={order.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
@@ -181,7 +174,7 @@ export default function AdminOrders() {
                       </div>
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4" />
-                        {order.price || "$0.00"}
+                        {order.price ? `${order.price} FCFA` : "0.00"}
                       </div>
                     </div>
                     {order.notes && (
@@ -191,11 +184,11 @@ export default function AdminOrders() {
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <div className="text-xl font-bold text-primary">{order.price || "$0.00"}</div>
+                    <div className="text-xl font-bold text-primary">{order.price ? `${order.price} FCFA` : "0.00"}</div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm">View Details</Button>
-                      {order.status === "Scheduled" && <Button variant="outline" size="sm">Assign Collector</Button>}
-                      {order.status === "In Progress" && <Button variant="outline" size="sm">Track Progress</Button>}
+                      {(order.status?.toLowerCase() === "scheduled") && <Button variant="outline" size="sm">Assign Collector</Button>}
+                      {(order.status?.toLowerCase() === "in progress") && <Button variant="outline" size="sm">Track Progress</Button>}
                     </div>
                   </div>
                 </div>

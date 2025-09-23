@@ -29,6 +29,7 @@ const navigationItems = [
   { title: "Complaints", url: "/citizen/complaints", icon: MessageSquare },
   { title: "New Complaint", url: "/citizen/complaints/new", icon: Plus },
   { title: "Profile", url: "/citizen/profile", icon: User },
+  { title: "Products", url: "/citizen/products", icon: ShoppingCart }, 
 ];
 
 export function CitizenSidebar() {

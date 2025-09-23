@@ -32,8 +32,6 @@ const navigationItems = [
   { title: "Products", url: "/admin/products", icon: Package },
   { title: "Locations", url: "/admin/locations", icon: MapPin },
   { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
-  { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
 export function AdminSidebar() {

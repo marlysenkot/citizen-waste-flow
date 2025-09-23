@@ -11,9 +11,8 @@ interface Product {
   description: string;
   category?: { id: string; name: string };
   features?: string[];
-  icon?: React.ElementType;
   popular?: boolean;
-  imageUrl?: string;
+  image?: string | File | null; // same as citizen dashboard
 }
 
 export const ProductCatalog = () => {
@@ -25,19 +24,22 @@ export const ProductCatalog = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
 
+  // Helper: get correct image URL (like citizen dashboard)
+  const getImageUrl = (image?: string | File | null) => {
+    if (!image) return "/placeholder.png"; // fallback
+    if (image instanceof File) return URL.createObjectURL(image);
+    return `${apiUrl}/images/${image}`; // backend filename
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!token) {
-        setError("User not authenticated");
-        setLoading(false);
-        return;
-      }
-
       try {
-        const res = await fetch(`${apiUrl}/products`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers: any = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch(`${apiUrl}/products`, { headers });
         if (!res.ok) throw new Error("Failed to fetch products");
+
         const data = await res.json();
         setProducts(data || []);
       } catch (err: any) {
@@ -57,24 +59,17 @@ export const ProductCatalog = () => {
   return (
     <section className="py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Title */}
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground">Our Products</h2>
-          <p className="text-muted-foreground mt-2">
-            Explore our range of products and buy the ones you like.
-          </p>
+          <p className="text-muted-foreground mt-2">Explore our range of products and buy the ones you like.</p>
         </div>
 
-        {/* Product Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product, index) => (
             <Card
               key={product.id}
               className="relative hover:shadow-glow transition-all duration-500 border-border/50 hover:border-primary/30 group glass hover-lift"
-              style={{
-                animationDelay: `${index * 0.1}s`,
-                animation: `fade-in-up 0.6s ease-out ${index * 0.1}s both`,
-              }}
+              style={{ animationDelay: `${index * 0.1}s`, animation: `fade-in-up 0.6s ease-out ${index * 0.1}s both` }}
             >
               {product.popular && (
                 <Badge className="absolute -top-2 left-4 bg-gradient-primary text-white shadow-glow animate-pulse-glow">
@@ -84,19 +79,13 @@ export const ProductCatalog = () => {
 
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-3">
-                  {/* Thumbnail Image */}
-                  {product.imageUrl && (
+                  {product.image && (
                     <img
-                      src={product.imageUrl}
+                      src={getImageUrl(product.image)}
                       alt={product.name}
                       className="w-12 h-12 rounded-full object-cover"
+                      onError={(e: any) => { e.currentTarget.src = "/placeholder.png"; }}
                     />
-                  )}
-
-                  {product.icon && (
-                    <div className="p-2 bg-gradient-primary rounded-lg group-hover:animate-bounce-subtle">
-                      <product.icon className="h-6 w-6 text-white" />
-                    </div>
                   )}
 
                   <div>
@@ -118,10 +107,7 @@ export const ProductCatalog = () => {
                   <ul className="space-y-1">
                     {product.features?.length
                       ? product.features.map((feature, idx) => (
-                          <li
-                            key={idx}
-                            className="text-sm text-muted-foreground flex items-center hover-lift"
-                          >
+                          <li key={idx} className="text-sm text-muted-foreground flex items-center hover-lift">
                             <div className="w-2 h-2 bg-gradient-primary rounded-full mr-3 animate-pulse-glow" />
                             {feature}
                           </li>
@@ -131,9 +117,7 @@ export const ProductCatalog = () => {
                 </div>
 
                 <Button
-                  className={`w-full transition-all duration-300 ${
-                    product.popular ? "bg-gradient-primary hover:shadow-glow" : "hover-lift"
-                  }`}
+                  className={`w-full transition-all duration-300 ${product.popular ? "bg-gradient-primary hover:shadow-glow" : "hover-lift"}`}
                   variant={product.popular ? "default" : "outline"}
                   onClick={() => navigate("/auth/login")}
                 >
@@ -148,3 +132,4 @@ export const ProductCatalog = () => {
     </section>
   );
 };
+
