@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,112 +19,112 @@ import {
   Package
 } from "lucide-react";
 import { Header } from "@/components/Header";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function AdminCollectors() {
+  const [collectors, setCollectors] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const collectors = [
-    {
-      id: "COL-001",
-      name: "Mike Johnson",
-      email: "mike.j@ecowaste.com",
-      phone: "+1 (555) 111-2222",
-      joinDate: "2023-12-01",
-      status: "Active",
-      license: "WM-12345",
-      vehicle: "Truck #101",
-      rating: 4.9,
-      totalCollections: 245,
-      thisMonthCollections: 48,
-      earnings: "$6,250",
-      lastActive: "2024-01-15"
-    },
-    {
-      id: "COL-002", 
-      name: "Lisa Brown",
-      email: "lisa.b@ecowaste.com",
-      phone: "+1 (555) 333-4444",
-      joinDate: "2024-01-01",
-      status: "Active",
-      license: "WM-12346",
-      vehicle: "Truck #102",
-      rating: 4.8,
-      totalCollections: 189,
-      thisMonthCollections: 45,
-      earnings: "$5,890",
-      lastActive: "2024-01-15"
-    },
-    {
-      id: "COL-003",
-      name: "Tom Wilson",
-      email: "tom.w@ecowaste.com", 
-      phone: "+1 (555) 777-8888",
-      joinDate: "2023-11-15",
-      status: "Inactive",
-      license: "WM-12347",
-      vehicle: "Truck #103", 
-      rating: 4.7,
-      totalCollections: 198,
-      thisMonthCollections: 42,
-      earnings: "$5,640",
-      lastActive: "2024-01-12"
-    },
-    {
-      id: "COL-004",
-      name: "Sarah Davis",
-      email: "sarah.d@ecowaste.com",
-      phone: "+1 (555) 999-0000",
-      joinDate: "2023-10-20",
-      status: "Active", 
-      license: "WM-12348",
-      vehicle: "Truck #104",
-      rating: 4.6,
-      totalCollections: 167,
-      thisMonthCollections: 39,
-      earnings: "$5,230",
-      lastActive: "2024-01-14"
-    },
-    {
-      id: "COL-005",
-      name: "Robert Garcia",
-      email: "robert.g@ecowaste.com",
-      phone: "+1 (555) 555-6666",
-      joinDate: "2024-01-05", 
-      status: "Training",
-      license: "WM-12349",
-      vehicle: "Truck #105",
-      rating: 4.3,
-      totalCollections: 23,
-      thisMonthCollections: 15,
-      earnings: "$890",
-      lastActive: "2024-01-15"
-    }
-  ];
+  // Add Collector Modal State
+  const [newCollector, setNewCollector] = useState({ username: "", email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "default";
-      case "Inactive":
-        return "secondary"; 
-      case "Training":
-        return "outline";
-      case "Suspended":
-        return "destructive";
-      default:
-        return "outline";
+  // Fetch collectors from API
+  useEffect(() => {
+    const fetchCollectors = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://127.0.0.1:8000/admin/collectors", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setCollectors(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch collectors:", err);
+      }
+    };
+    fetchCollectors();
+  }, []);
+
+  const handleAddCollector = async () => {
+    if (!newCollector.username || !newCollector.email || !newCollector.password) {
+      setMessage("All fields are required");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://127.0.0.1:8000/admin/collectors", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newCollector),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.detail || "Failed to create collector");
+      } else {
+        setMessage(data.msg);
+        setNewCollector({ username: "", email: "", password: "" });
+
+        // Refresh collectors list
+        const collectorsRes = await fetch("http://127.0.0.1:8000/admin/collectors", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const collectorsData = await collectorsRes.json();
+        setCollectors(collectorsData);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderStars = (rating: number) => {
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case "Active": return "default";
+      case "Inactive": return "secondary"; 
+      case "Training": return "outline";
+      case "Suspended": return "destructive";
+      default: return "outline";
+    }
+  };
+
+  const renderStars = (rating?: number) => {
+    const r = rating ?? 0;
     return Array.from({ length: 5 }, (_, i) => (
       <Star 
         key={i}
-        className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+        className={`h-4 w-4 ${i < Math.floor(r) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
       />
     ));
   };
+
+  const filteredCollectors = collectors.filter((c) => {
+    const name = c.username || "";
+    const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
+    const status = c.status || "";
+    const matchesStatus = 
+      statusFilter === "all" ||
+      (statusFilter === "active" && status === "Active") ||
+      (statusFilter === "inactive" && status === "Inactive") ||
+      (statusFilter === "training" && status === "Training") ||
+      (statusFilter === "suspended" && status === "Suspended");
+    return matchesSearch && matchesStatus;
+  });
 
   const stats = {
     total: collectors.length,
@@ -136,7 +136,6 @@ export default function AdminCollectors() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link to="/admin/dashboard" className="inline-flex items-center text-primary hover:underline mb-4">
@@ -156,7 +155,6 @@ export default function AdminCollectors() {
               <div className="text-sm text-muted-foreground">Total Collectors</div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="p-4 text-center">
               <Users className="h-8 w-8 text-success mx-auto mb-2" />
@@ -164,7 +162,6 @@ export default function AdminCollectors() {
               <div className="text-sm text-muted-foreground">Active</div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="p-4 text-center">
               <Users className="h-8 w-8 text-warning mx-auto mb-2" />
@@ -172,7 +169,6 @@ export default function AdminCollectors() {
               <div className="text-sm text-muted-foreground">Inactive</div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="p-4 text-center">
               <Users className="h-8 w-8 text-accent mx-auto mb-2" />
@@ -207,113 +203,118 @@ export default function AdminCollectors() {
                   <SelectItem value="suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Collector
-              </Button>
+
+              {/* Add Collector Modal */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" /> Add Collector
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Collector</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <Input 
+                      placeholder="Username"
+                      value={newCollector.username}
+                      onChange={(e) => setNewCollector({ ...newCollector, username: e.target.value })}
+                    />
+                    <Input 
+                      placeholder="Email"
+                      type="email"
+                      value={newCollector.email}
+                      onChange={(e) => setNewCollector({ ...newCollector, email: e.target.value })}
+                    />
+                    <Input 
+                      placeholder="Password"
+                      type="password"
+                      value={newCollector.password}
+                      onChange={(e) => setNewCollector({ ...newCollector, password: e.target.value })}
+                    />
+                    {message && <p className="text-sm text-green-600">{message}</p>}
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleAddCollector} disabled={loading}>
+                      {loading ? "Adding..." : "Add Collector"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
             </div>
           </CardContent>
         </Card>
 
         {/* Collectors List */}
         <div className="space-y-4">
-          {collectors.map((collector) => (
+          {filteredCollectors.map((collector) => (
             <Card key={collector.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold">{collector.name}</h3>
-                      <Badge variant={getStatusColor(collector.status)}>
-                        {collector.status}
-                      </Badge>
-                      <span className="text-sm text-muted-foreground">{collector.id}</span>
+                      <h3 className="text-lg font-semibold">{collector.username || "Unknown"}</h3>
+                      <Badge variant={getStatusColor(collector.status)}>{collector.status || "N/A"}</Badge>
+                      <span className="text-sm text-muted-foreground">{collector.id || "N/A"}</span>
                     </div>
-                    
                     <div className="flex items-center gap-2">
                       <div className="flex">{renderStars(collector.rating)}</div>
-                      <span className="text-sm font-medium">{collector.rating}/5</span>
+                      <span className="text-sm font-medium">{collector.rating ?? 0}/5</span>
                       <span className="text-sm text-muted-foreground">
-                        ({collector.totalCollections} collections)
+                        ({collector.totalCollections ?? 0} collections)
                       </span>
                     </div>
-                    
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4" />
-                        {collector.email}
+                        {collector.email || "N/A"}
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4" />
-                        {collector.phone}
+                        {collector.phone || "N/A"}
                       </div>
                       <div className="flex items-center gap-2">
                         <Truck className="h-4 w-4" />
-                        {collector.vehicle} • {collector.license}
+                        {collector.vehicle || "N/A"} • {collector.license || "N/A"}
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        Joined {collector.joinDate}
+                        Joined {collector.joinDate || "N/A"}
                       </div>
                     </div>
-                    
                     <div className="flex items-center gap-6 text-sm">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">This Month:</span>
-                        <span className="font-medium">{collector.thisMonthCollections} collections</span>
+                        <span className="font-medium">{collector.thisMonthCollections ?? 0} collections</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">Earnings:</span>
-                        <span className="font-medium">{collector.earnings}</span>
+                        <span className="font-medium">{collector.earnings || "$0"}</span>
                       </div>
                       <div className="text-muted-foreground">
-                        Last Active: <span className="font-medium">{collector.lastActive}</span>
+                        Last Active: <span className="font-medium">{collector.lastActive || "N/A"}</span>
                       </div>
                     </div>
                   </div>
-                  
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        View Profile
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        View Tasks
-                      </Button>
+                      <Button variant="outline" size="sm">View Profile</Button>
+                      <Button variant="outline" size="sm">View Tasks</Button>
                     </div>
                     <div className="flex gap-2">
-                      {collector.status === "Active" && (
-                        <Button variant="outline" size="sm">
-                          Assign Task
-                        </Button>
-                      )}
-                      {collector.status === "Inactive" && (
-                        <Button variant="outline" size="sm">
-                          Reactivate
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="sm">
-                        More Actions
-                      </Button>
+                      {collector.status === "Active" && <Button variant="outline" size="sm">Assign Task</Button>}
+                      {collector.status === "Inactive" && <Button variant="outline" size="sm">Reactivate</Button>}
+                      <Button variant="ghost" size="sm">More Actions</Button>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center mt-8">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">Previous</Button>
-            <Button size="sm">1</Button>
-            <Button variant="outline" size="sm">2</Button>
-            <Button variant="outline" size="sm">3</Button>
-            <Button variant="outline" size="sm">Next</Button>
-          </div>
         </div>
       </div>
     </div>
