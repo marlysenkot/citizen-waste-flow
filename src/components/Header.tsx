@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { NotificationCenter } from "@/components/NotificationCenter";
 import { 
   NavigationMenu,
   NavigationMenuContent,
@@ -126,12 +125,6 @@ export const Header = () => {
           {/* Auth & Actions */}
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle />
-            <NotificationCenter />
-            <Link to="/citizen/dashboard">
-              <Button variant="outline" size="sm" className="hover-lift transition-all duration-300">
-                Customer Portal
-              </Button>
-            </Link>
             <Link to="/auth/login">
               <Button variant="default" size="sm" className="bg-gradient-primary hover:shadow-glow transition-all duration-300">
                 Sign In
@@ -196,12 +189,6 @@ export const Header = () => {
                   >
                     Contact
                   </Button>
-                  <Link to="/citizen/dashboard">
-                    <Button variant="outline" size="sm" className="justify-start w-full hover-lift">
-                      <User className="h-4 w-4 mr-2" />
-                      Customer Portal
-                    </Button>
-                  </Link>
                 </div>
               </div>
               <Link to="/auth/login" className="w-full">

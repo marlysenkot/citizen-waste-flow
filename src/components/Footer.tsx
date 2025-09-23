@@ -111,7 +111,7 @@ export const Footer = () => {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+(237) 696 588 373</span>
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Mail className="h-4 w-4" />
@@ -119,7 +119,7 @@ export const Footer = () => {
               </div>
               <div className="flex items-start space-x-2 text-muted-foreground">
                 <MapPin className="h-4 w-4 mt-0.5" />
-                <span>123 Green Street<br />Eco City, EC 12345</span>
+                <span>123 Biyem-Assi<br />Biyem-Assi, BA 12345</span>
               </div>
             </div>
           </div>
@@ -128,7 +128,7 @@ export const Footer = () => {
         <div className="border-t border-border/50 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-muted-foreground">
-              © 2024 EcoWaste. All rights reserved.
+              © 2025 Eco-Waste. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">

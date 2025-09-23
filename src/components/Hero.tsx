@@ -1,22 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { 
   Recycle,
   Truck,
   Calendar,
-  Phone,
   ArrowRight
 } from "lucide-react";
 import heroImage from "@/assets/hero-waste-management.jpg";
 
 export const Hero = () => {
+  const navigate = useNavigate();
+
   return (
-    <section id="hero" className="relative py-20 lg:py-32 overflow-hidden bg-gradient-hero animate-gradient">
+    <section
+      id="hero"
+      className="relative py-20 lg:py-32 overflow-hidden bg-gradient-hero animate-gradient"
+    >
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src={heroImage} 
+        <img
+          src={heroImage}
           alt="Modern waste management and recycling services"
           className="w-full h-full object-cover opacity-20 animate-float"
         />
@@ -30,53 +34,70 @@ export const Hero = () => {
             <div className="space-y-4">
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
                 <span className="text-foreground">Smart Waste</span>
-                <span className="text-primary block animate-slide-in-left">Management</span>
-                <span className="text-accent animate-slide-in-right">Solutions</span>
+                <span className="text-primary block animate-slide-in-left">
+                  Management
+                </span>
+                <span className="text-accent animate-slide-in-right">
+                  Solutions
+                </span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-lg animate-fade-in">
-                Efficient, sustainable waste collection and recycling services for a cleaner tomorrow. 
-                Schedule collections, track orders, and contribute to environmental sustainability.
+                Efficient, sustainable waste collection and recycling services
+                for a cleaner tomorrow. Schedule collections, track orders, and
+                contribute to environmental sustainability.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 animate-scale-in">
-              <Button 
-                size="lg" 
+              {/* Redirect to Login */}
+              <Button
+                size="lg"
                 className="text-lg px-8 bg-gradient-primary hover-glow transition-all duration-300"
-                onClick={() => {
-                  const element = document.getElementById('services');
-                  element?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={() => navigate("/auth/login")}
               >
                 Schedule Collection
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
+
+              {/* Scroll to Products */}
+              <Button
+                variant="outline"
+                size="lg"
                 className="text-lg px-8 hover-lift glass transition-all duration-300"
                 onClick={() => {
-                  const element = document.getElementById('products');
-                  element?.scrollIntoView({ behavior: 'smooth' });
+                  const element = document.getElementById("products");
+                  element?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                Browse Services
+                Browse Products
               </Button>
             </div>
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4 pt-8 animate-fade-in">
               <div className="text-center hover-lift">
-                <div className="text-2xl font-bold text-primary animate-pulse-scale">500+</div>
-                <div className="text-sm text-muted-foreground">Active Collectors</div>
+                <div className="text-2xl font-bold text-primary animate-pulse-scale">
+                  500+
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Active Collectors
+                </div>
               </div>
               <div className="text-center hover-lift">
-                <div className="text-2xl font-bold text-accent animate-pulse-scale">25K+</div>
-                <div className="text-sm text-muted-foreground">Collections Made</div>
+                <div className="text-2xl font-bold text-accent animate-pulse-scale">
+                  25K+
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Collections Made
+                </div>
               </div>
               <div className="text-center hover-lift">
-                <div className="text-2xl font-bold text-success animate-pulse-scale">98%</div>
-                <div className="text-sm text-muted-foreground">Customer Satisfaction</div>
+                <div className="text-2xl font-bold text-success animate-pulse-scale">
+                  98%
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Customer Satisfaction
+                </div>
               </div>
             </div>
           </div>
@@ -90,7 +111,9 @@ export const Hero = () => {
                     <Recycle className="h-6 w-6 text-white" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Recycling Services</h3>
+                    <h3 className="text-lg font-semibold">
+                      Recycling Services
+                    </h3>
                     <p className="text-muted-foreground">
                       Comprehensive recycling programs for all material types
                     </p>
@@ -106,9 +129,12 @@ export const Hero = () => {
                     <Truck className="h-6 w-6 text-white" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Collection Services</h3>
+                    <h3 className="text-lg font-semibold">
+                      Collection Services
+                    </h3>
                     <p className="text-muted-foreground">
-                      Regular and on-demand waste collection for homes and businesses
+                      Regular and on-demand waste collection for homes and
+                      businesses
                     </p>
                   </div>
                 </div>
