@@ -18,10 +18,46 @@ export default function Register() {
     address: "",
     language: ""
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleRegister = () => {
-    // Mock registration - redirect to citizen dashboard
-    navigate("/citizen/dashboard");
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  const handleRegister = async () => {
+    setLoading(true);
+    setError("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiUrl}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: "citizen" // default role for registration
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Registration failed");
+      }
+
+      // Registration successful, redirect to login or dashboard
+      navigate("/auth/login");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,6 +77,9 @@ export default function Register() {
             <CardTitle>Register as Citizen</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
@@ -118,8 +157,8 @@ export default function Register() {
               />
             </div>
             
-            <Button className="w-full" onClick={handleRegister}>
-              Create Account
+            <Button className="w-full" onClick={handleRegister} disabled={loading}>
+              {loading ? "Creating Account..." : "Create Account"}
             </Button>
 
             <div className="text-center">

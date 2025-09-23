@@ -19,17 +19,51 @@ export default function NewComplaint() {
     description: "",
     contactPhone: ""
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = () => {
-    // Mock submission
-    alert("Complaint submitted successfully! Reference ID: COMP-004");
-    navigate("/citizen/complaints");
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`${apiUrl}/citizens/complaints`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          subject: formData.subject,
+          description: formData.description,
+          priority: formData.priority,
+          category: formData.category,
+          order_id: formData.orderId,
+          contact_phone: formData.contactPhone
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.detail || "Failed to submit complaint");
+      }
+
+      const data = await res.json();
+      alert(`Complaint submitted successfully! Reference ID: ${data.id}`);
+      navigate("/citizen/complaints");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link to="/citizen/complaints" className="inline-flex items-center text-primary hover:underline mb-4">
@@ -46,6 +80,8 @@ export default function NewComplaint() {
               <CardTitle>Complaint Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {error && <p className="text-red-500">{error}</p>}
+
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject</Label>
                 <Input
@@ -113,7 +149,7 @@ export default function NewComplaint() {
                 <Label htmlFor="description">Detailed Description</Label>
                 <Textarea
                   id="description"
-                  placeholder="Please provide a detailed description of the issue, including dates, times, and any other relevant information..."
+                  placeholder="Provide detailed info about the issue..."
                   className="min-h-[120px]"
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
@@ -131,8 +167,8 @@ export default function NewComplaint() {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <Button className="flex-1" onClick={handleSubmit}>
-                  Submit Complaint
+                <Button className="flex-1" onClick={handleSubmit} disabled={loading}>
+                  {loading ? "Submitting..." : "Submit Complaint"}
                 </Button>
                 <Link to="/citizen/complaints">
                   <Button variant="outline">Cancel</Button>

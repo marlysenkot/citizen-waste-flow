@@ -13,9 +13,8 @@ import Register from "./pages/auth/Register";
 
 // Citizen pages
 import CitizenDashboard from "./pages/citizen/Dashboard";
-import Services from "./pages/citizen/Services";
-import Schedule from "./pages/citizen/Schedule";
 import Orders from "./pages/citizen/Orders";
+import Collections from "./pages/citizen/Collections";
 import Complaints from "./pages/citizen/Complaints";
 import NewComplaint from "./pages/citizen/NewComplaint";
 import Profile from "./pages/citizen/Profile";
@@ -57,8 +56,7 @@ const App = () => (
           {/* Citizen Routes */}
           <Route path="/citizen" element={<CitizenLayout />}>
             <Route path="dashboard" element={<CitizenDashboard />} />
-            <Route path="services" element={<Services />} />
-            <Route path="schedule" element={<Schedule />} />
+            <Route path="collections" element={<Collections />} />
             <Route path="orders" element={<Orders />} />
             <Route path="complaints" element={<Complaints />} />
             <Route path="complaints/new" element={<NewComplaint />} />

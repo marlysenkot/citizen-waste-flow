@@ -1,38 +1,102 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, User, Bell, Shield } from "lucide-react";
 import { Header } from "@/components/Header";
 
-export default function Profile() {
-  const [profile, setProfile] = useState({
-    name: "John Doe",
-    email: "john.doe@email.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main Street, City Center",
-    language: "en",
-    notifications: {
-      email: true,
-      sms: true,
-      reminders: true,
-      marketing: false
-    }
-  });
-
-  const handleSave = () => {
-    // Mock save functionality
-    alert("Profile updated successfully!");
+interface ProfileData {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  language: string;
+  notifications: {
+    email: boolean;
+    sms: boolean;
+    reminders: boolean;
+    marketing: boolean;
   };
+}
+
+export default function Profile() {
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/citizens/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        const data = await res.json();
+
+        // Ensure defaults in case fields are missing
+        setProfile({
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          address: data.address || "",
+          language: data.language || "en",
+          notifications: {
+            email: data.notifications?.email ?? true,
+            sms: data.notifications?.sms ?? true,
+            reminders: data.notifications?.reminders ?? true,
+            marketing: data.notifications?.marketing ?? false,
+          },
+        });
+      } catch (err) {
+        console.error(err);
+        // Fallback default
+        setProfile({
+          name: "",
+          email: "",
+          phone: "",
+          address: "",
+          language: "en",
+          notifications: { email: true, sms: true, reminders: true, marketing: false },
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [apiUrl, token]);
+
+  const handleSave = async () => {
+    if (!profile) return;
+    try {
+      const res = await fetch(`${apiUrl}/citizens/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(profile),
+      });
+      if (!res.ok) throw new Error("Failed to save profile");
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save profile");
+    }
+  };
+
+  if (loading || !profile) return <p className="text-center mt-8">Loading profile...</p>;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link to="/citizen/dashboard" className="inline-flex items-center text-primary hover:underline mb-4">
@@ -55,46 +119,50 @@ export default function Profile() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input
+                <input
                   id="name"
+                  className="input"
                   value={profile.name}
-                  onChange={(e) => setProfile({...profile, name: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
-                <Input
+                <input
                   id="email"
                   type="email"
+                  className="input"
                   value={profile.email}
-                  onChange={(e) => setProfile({...profile, email: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input
+                <input
                   id="phone"
+                  className="input"
                   value={profile.phone}
-                  onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="address">Address</Label>
-                <Input
+                <input
                   id="address"
+                  className="input"
                   value={profile.address}
-                  onChange={(e) => setProfile({...profile, address: e.target.value})}
+                  onChange={(e) => setProfile({ ...profile, address: e.target.value })}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Preferred Language</Label>
-                <Select 
-                  value={profile.language} 
-                  onValueChange={(value) => setProfile({...profile, language: value})}
+                <Select
+                  value={profile.language}
+                  onValueChange={(value) => setProfile({ ...profile, language: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -118,77 +186,22 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive order updates and important announcements via email
-                  </p>
+              {Object.entries(profile.notifications || {}).map(([key, value]) => (
+                <div key={key} className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="capitalize">{key} Notifications</Label>
+                  </div>
+                  <Switch
+                    checked={!!value}
+                    onCheckedChange={(checked) =>
+                      setProfile({
+                        ...profile,
+                        notifications: { ...profile.notifications, [key]: checked },
+                      })
+                    }
+                  />
                 </div>
-                <Switch
-                  checked={profile.notifications.email}
-                  onCheckedChange={(checked) => 
-                    setProfile({
-                      ...profile, 
-                      notifications: {...profile.notifications, email: checked}
-                    })
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>SMS Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Get text messages for collection reminders and updates
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.notifications.sms}
-                  onCheckedChange={(checked) => 
-                    setProfile({
-                      ...profile, 
-                      notifications: {...profile.notifications, sms: checked}
-                    })
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Collection Reminders</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive reminders before scheduled collections
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.notifications.reminders}
-                  onCheckedChange={(checked) => 
-                    setProfile({
-                      ...profile, 
-                      notifications: {...profile.notifications, reminders: checked}
-                    })
-                  }
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Marketing Communications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive promotional offers and service updates
-                  </p>
-                </div>
-                <Switch
-                  checked={profile.notifications.marketing}
-                  onCheckedChange={(checked) => 
-                    setProfile({
-                      ...profile, 
-                      notifications: {...profile.notifications, marketing: checked}
-                    })
-                  }
-                />
-              </div>
+              ))}
             </CardContent>
           </Card>
 

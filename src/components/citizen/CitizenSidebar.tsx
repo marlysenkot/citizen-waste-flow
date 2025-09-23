@@ -6,7 +6,8 @@ import {
   MessageSquare,
   Plus,
   User,
-  Recycle
+  Recycle,
+  Trash
 } from "lucide-react";
 
 import {
@@ -23,9 +24,8 @@ import {
 
 const navigationItems = [
   { title: "Dashboard", url: "/citizen/dashboard", icon: LayoutDashboard },
-  { title: "Services", url: "/citizen/services", icon: Recycle },
-  { title: "Schedule", url: "/citizen/schedule", icon: Calendar },
   { title: "Orders", url: "/citizen/orders", icon: ShoppingCart },
+  { title: "Collections", url: "/citizen/collections", icon: Trash },
   { title: "Complaints", url: "/citizen/complaints", icon: MessageSquare },
   { title: "New Complaint", url: "/citizen/complaints/new", icon: Plus },
   { title: "Profile", url: "/citizen/profile", icon: User },

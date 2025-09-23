@@ -11,19 +11,55 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (userType: string) => {
-    // Mock login - redirect to respective dashboard
-    switch (userType) {
-      case "citizen":
-        navigate("/citizen/dashboard");
-        break;
-      case "collector":
-        navigate("/collector/dashboard");
-        break;
-      case "admin":
-        navigate("/admin/dashboard");
-        break;
+  const apiUrl = import.meta.env.VITE_API_URL; // Backend URL
+
+  const handleLogin = async (userType: string) => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // Prepare form-encoded data for OAuth2PasswordRequestForm
+      const formData = new URLSearchParams();
+      formData.append("username", email); // OAuth2 expects "username"
+      formData.append("password", password);
+
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData.toString(),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Login failed");
+      }
+
+      // Store JWT token
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("userType", userType);
+
+      // Redirect based on role
+      switch (userType) {
+        case "citizen":
+          navigate("/citizen/dashboard");
+          break;
+        case "collector":
+          navigate("/collector/dashboard");
+          break;
+        case "admin":
+          navigate("/admin/dashboard");
+          break;
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,11 +118,13 @@ export default function Login() {
                       onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
-                  <Button 
-                    className="w-full" 
+                  {error && <p className="text-red-500 text-sm">{error}</p>}
+                  <Button
+                    className="w-full"
                     onClick={() => handleLogin(userType)}
+                    disabled={loading}
                   >
-                    Sign In as {userType === "citizen" ? "Citizen" : userType === "collector" ? "Collector" : "Administrator"}
+                    {loading ? "Signing in..." : `Sign In as ${userType}`}
                   </Button>
                 </TabsContent>
               ))}

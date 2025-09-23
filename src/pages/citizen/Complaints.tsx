@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,80 +15,75 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 
+interface Complaint {
+  id: string;
+  subject: string;
+  description: string;
+  status: string;
+  date: string;
+  priority: string;
+  response: string | null;
+}
+
 export default function Complaints() {
-  const complaints = [
-    {
-      id: "COMP-001",
-      subject: "Missed Collection",
-      description: "My scheduled collection was missed on January 8th. No notification was provided.",
-      status: "Under Review",
-      date: "2024-01-08",
-      priority: "Medium",
-      response: "We are investigating this issue and will get back to you within 24 hours."
-    },
-    {
-      id: "COMP-002",
-      subject: "Damaged Bin",
-      description: "My recycling bin was damaged during the last collection. Requesting replacement.",
-      status: "Resolved",
-      date: "2024-01-05",
-      priority: "Low",
-      response: "A new recycling bin has been scheduled for delivery on January 10th."
-    },
-    {
-      id: "COMP-003",
-      subject: "Late Collection",
-      description: "Collection service was 3 hours late without prior notification.",
-      status: "Open",
-      date: "2024-01-12",
-      priority: "High",
-      response: null
-    }
-  ];
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [loading, setLoading] = useState(true);
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/citizens/complaints`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch complaints");
+        const data = await res.json();
+        setComplaints(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComplaints();
+  }, [apiUrl, token]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "Resolved":
-        return <CheckCircle className="h-4 w-4" />;
-      case "Under Review":
-        return <Clock className="h-4 w-4" />;
-      case "Open":
-        return <AlertTriangle className="h-4 w-4" />;
-      default:
-        return <MessageSquare className="h-4 w-4" />;
+      case "Resolved": return <CheckCircle className="h-4 w-4" />;
+      case "Under Review": return <Clock className="h-4 w-4" />;
+      case "Open": return <AlertTriangle className="h-4 w-4" />;
+      default: return <MessageSquare className="h-4 w-4" />;
     }
   };
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case "Resolved":
-        return "default";
-      case "Under Review":
-        return "secondary";
-      case "Open":
-        return "destructive";
-      default:
-        return "outline";
+      case "Resolved": return "default";
+      case "Under Review": return "secondary";
+      case "Open": return "destructive";
+      default: return "outline";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "High":
-        return "text-red-600";
-      case "Medium":
-        return "text-yellow-600";
-      case "Low":
-        return "text-green-600";
-      default:
-        return "text-muted-foreground";
+      case "High": return "text-red-600";
+      case "Medium": return "text-yellow-600";
+      case "Low": return "text-green-600";
+      default: return "text-muted-foreground";
     }
   };
+
+  if (loading) return <p className="text-center mt-8">Loading complaints...</p>;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link to="/citizen/dashboard" className="inline-flex items-center text-primary hover:underline mb-4">
@@ -98,7 +94,6 @@ export default function Complaints() {
           <p className="text-muted-foreground">Submit and track your service complaints and feedback.</p>
         </div>
 
-        {/* Search and New Complaint */}
         <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex gap-4">
@@ -116,7 +111,24 @@ export default function Complaints() {
           </CardContent>
         </Card>
 
-        {/* Complaints List */}
+        {complaints.length === 0 && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No complaints submitted</h3>
+              <p className="text-muted-foreground mb-4">
+                You haven't submitted any complaints yet. Submit a new complaint to get started.
+              </p>
+              <Link to="/citizen/complaints/new">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Submit First Complaint
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="space-y-4">
           {complaints.map((complaint) => (
             <Card key={complaint.id} className="hover:shadow-lg transition-shadow">
@@ -135,12 +147,12 @@ export default function Complaints() {
                     </div>
                     <span className="text-sm text-muted-foreground">{complaint.date}</span>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold mb-2">{complaint.subject}</h3>
                     <p className="text-muted-foreground">{complaint.description}</p>
                   </div>
-                  
+
                   {complaint.response && (
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <h4 className="font-medium mb-2 flex items-center gap-2">
@@ -150,7 +162,7 @@ export default function Complaints() {
                       <p className="text-sm text-muted-foreground">{complaint.response}</p>
                     </div>
                   )}
-                  
+
                   <div className="flex justify-end gap-2">
                     <Button variant="ghost" size="sm">
                       View Details
@@ -166,25 +178,6 @@ export default function Complaints() {
             </Card>
           ))}
         </div>
-
-        {/* Empty state if no complaints */}
-        {complaints.length === 0 && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No complaints submitted</h3>
-              <p className="text-muted-foreground mb-4">
-                You haven't submitted any complaints yet. If you experience any issues with our services, don't hesitate to reach out.
-              </p>
-              <Link to="/citizen/complaints/new">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Submit First Complaint
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );
