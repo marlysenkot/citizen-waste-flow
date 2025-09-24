@@ -67,65 +67,64 @@ export const ProductCatalog = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product, index) => (
             <Card
-              key={product.id}
-              className="relative hover:shadow-glow transition-all duration-500 border-border/50 hover:border-primary/30 group glass hover-lift"
-              style={{ animationDelay: `${index * 0.1}s`, animation: `fade-in-up 0.6s ease-out ${index * 0.1}s both` }}
-            >
-              {product.popular && (
-                <Badge className="absolute -top-2 left-4 bg-gradient-primary text-white shadow-glow animate-pulse-glow">
-                  Popular Choice
-                </Badge>
-              )}
+  key={product.id}
+  className="relative hover:shadow-glow transition-all duration-500 border-border/50 hover:border-primary/30 group glass hover-lift"
+  style={{ animationDelay: `${index * 0.1}s`, animation: `fade-in-up 0.6s ease-out ${index * 0.1}s both` }}
+>
+  {product.popular && (
+    <Badge className="absolute -top-2 left-4 bg-gradient-primary text-white shadow-glow animate-pulse-glow">
+      Popular Choice
+    </Badge>
+  )}
 
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-3">
-                  {product.image && (
-                    <img
-                      src={getImageUrl(product.image)}
-                      alt={product.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                      onError={(e: any) => { e.currentTarget.src = "/placeholder.png"; }}
-                    />
-                  )}
+  {/* Product Image */}
+  {product.image && (
+    <img
+      src={getImageUrl(product.image)}
+      alt={product.name}
+      className="w-full h-48 md:h-64 lg:h-72 rounded-t-lg object-cover"
+      onError={(e: any) => { e.currentTarget.src = "/placeholder.png"; }}
+    />
+  )}
 
-                  <div>
-                    <Badge variant="outline" className="text-xs mb-2 border-primary/20">
-                      {product.category?.name || "Uncategorized"}
-                    </Badge>
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                      {product.name}
-                    </CardTitle>
-                  </div>
-                </div>
-              </CardHeader>
+  <CardHeader className="pt-4 pb-2">
+    <div>
+      <Badge variant="outline" className="text-xs mb-2 border-primary/20">
+        {product.category?.name || "Uncategorized"}
+      </Badge>
+      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+        {product.name}
+      </CardTitle>
+    </div>
+  </CardHeader>
 
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground text-sm">{product.description}</p>
+  <CardContent className="space-y-4">
+    <p className="text-muted-foreground text-sm">{product.description}</p>
 
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-primary">Key Features:</h4>
-                  <ul className="space-y-1">
-                    {product.features?.length
-                      ? product.features.map((feature, idx) => (
-                          <li key={idx} className="text-sm text-muted-foreground flex items-center hover-lift">
-                            <div className="w-2 h-2 bg-gradient-primary rounded-full mr-3 animate-pulse-glow" />
-                            {feature}
-                          </li>
-                        ))
-                      : <li className="text-sm text-muted-foreground">No features listed</li>}
-                  </ul>
-                </div>
+    <div className="space-y-2">
+      <h4 className="text-sm font-medium text-primary">Key Features:</h4>
+      <ul className="space-y-1">
+        {product.features?.length
+          ? product.features.map((feature, idx) => (
+              <li key={idx} className="text-sm text-muted-foreground flex items-center hover-lift">
+                <div className="w-2 h-2 bg-gradient-primary rounded-full mr-3 animate-pulse-glow" />
+                {feature}
+              </li>
+            ))
+          : <li className="text-sm text-muted-foreground">No features listed</li>}
+      </ul>
+    </div>
 
-                <Button
-                  className={`w-full transition-all duration-300 ${product.popular ? "bg-gradient-primary hover:shadow-glow" : "hover-lift"}`}
-                  variant={product.popular ? "default" : "outline"}
-                  onClick={() => navigate("/auth/login")}
-                >
-                  Buy Now
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </CardContent>
-            </Card>
+    <Button
+      className={`w-full transition-all duration-300 ${product.popular ? "bg-gradient-primary hover:shadow-glow" : "hover-lift"}`}
+      variant={product.popular ? "default" : "outline"}
+      onClick={() => navigate("/auth/login")}
+    >
+      Buy Now
+      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+    </Button>
+  </CardContent>
+</Card>
           ))}
         </div>
       </div>

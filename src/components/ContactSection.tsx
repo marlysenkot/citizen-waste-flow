@@ -53,9 +53,9 @@ const offices = [
     hours: "Mon-Fri: 8AM-6PM"
   },
   { 
-    city: "",
-    address: "789 Waste St, Chicago, IL 60601",
-    phone: "+1 (555) 456-7890", 
+    city: "Bafoussam",
+    address: "789 Waste St, Marche A, BF 606",
+    phone: "+(237) 672 380 318", 
     hours: "Mon-Fri: 8AM-6PM"
   }
 ];
@@ -177,7 +177,7 @@ export const ContactSection = () => {
 
             <div className="text-center lg:text-right">
               <div className="text-3xl font-bold text-primary mb-2">
-                +1 (555) 911-WASTE
+                +(237) 699 816 631 
               </div>
               <div className="text-muted-foreground mb-6">Emergency & Priority Support</div>
               <div className="space-y-3">
